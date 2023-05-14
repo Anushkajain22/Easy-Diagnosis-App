@@ -3,9 +3,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:neumorphic_button/neumorphic_button.dart';
+import 'package:self_login/hospital_info.dart/review_system/hospitalist2.dart';
 
-import 'hospitalist2.dart';
+// import 'hospitalist2.dart';
 
 // import 'hospitalist2.dart';
 
@@ -17,6 +20,35 @@ class HospitalistDetails extends StatefulWidget {
 }
 
 class _HospitalistDetailsState extends State<HospitalistDetails> {
+  final geolocator =
+      Geolocator.getCurrentPosition(forceAndroidLocationManager: true);
+  Position? _currentPosition;
+  String currentaddress = "";
+  void getCurrentLocation() {
+    Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
+        .then((Position position) {
+      setState(() {
+        _currentPosition = position;
+      });
+      getAddressFromLatLng();
+    }).catchError((e) {
+      print(e);
+    });
+  }
+
+  void getAddressFromLatLng() async {
+    try {
+      List<Placemark> p = await placemarkFromCoordinates(
+          _currentPosition!.latitude, _currentPosition!.longitude);
+      Placemark place = p[0];
+      setState(() {
+        currentaddress = "${place.street},${place.name},${place.country}";
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
   TextEditingController sampledata1 = new TextEditingController();
   TextEditingController sampledata2 = new TextEditingController();
   TextEditingController sampledata3 = new TextEditingController();
@@ -89,7 +121,7 @@ class _HospitalistDetailsState extends State<HospitalistDetails> {
                   ),
                   TextFormField(
                     controller: sampledata2,
-                    decoration: InputDecoration(labelText: "Phone no."),
+                    decoration: InputDecoration(labelText: "Phone no"),
                     validator: ((value) {
                       if (value!.isEmpty ||
                           !RegExp(r'^(?:[+0]9)?[0-9]{10}$').hasMatch(value!)) {
@@ -118,19 +150,46 @@ class _HospitalistDetailsState extends State<HospitalistDetails> {
                   SizedBox(
                     height: height * 0.05,
                   ),
-                  TextFormField(
-                    controller: sampledata4,
-                    decoration: InputDecoration(labelText: "Location"),
-                    validator: ((value) {
-                      if (value!.isEmpty
-                          // ||
-                          //     !RegExp(r'^[a-z A-Z]+$').hasMatch(value!)
-                          ) {
-                        return "Enter correct Location";
-                      } else {
-                        return null;
-                      }
-                    }),
+
+                  TextButton(
+                    onPressed: getCurrentLocation,
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.location_on,
+                          color: Colors.black54,
+                        ),
+                        Text(
+                          ' Current location',
+                          style: TextStyle(fontSize: 19, color: Colors.black54),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    width: 100,
+                  ),
+                  if (_currentPosition != null && currentaddress != null)
+                    Text(currentaddress)
+                  else
+                    Text('No location track'),
+
+                  // TextFormField(
+                  //   controller: sampledata4,
+                  //   decoration: InputDecoration(labelText: "Location"),
+                  //   validator: ((value) {
+                  //     if (value!.isEmpty
+                  //         // ||
+                  //         //     !RegExp(r'^[a-z A-Z]+$').hasMatch(value!)
+                  //         ) {
+                  //       return "Enter correct Location";
+                  //     } else {
+                  //       return null;
+                  //     }
+                  //   }),
+                  // ),
+                  SizedBox(
+                    width: 100,
                   ),
                   SizedBox(
                     height: height * 0.05,
@@ -165,8 +224,7 @@ class _HospitalistDetailsState extends State<HospitalistDetails> {
                   ),
                   TextFormField(
                     controller: sampledata6,
-                    decoration:
-                        InputDecoration(labelText: "First Doctor Details"),
+                    decoration: InputDecoration(labelText: "Package1"),
                     validator: ((value) {
                       if (value!.isEmpty) {
                         // !RegExp(r'^[a-z A-Z]+$').hasMatch(value!)) {
@@ -181,8 +239,7 @@ class _HospitalistDetailsState extends State<HospitalistDetails> {
                   ),
                   TextFormField(
                     controller: sampledata7,
-                    decoration:
-                        InputDecoration(labelText: "Second Doctor Details"),
+                    decoration: InputDecoration(labelText: "estimated cost1"),
                     validator: ((value) {
                       // if (value!.isEmpty) {
                       //   // !RegExp(r'^[a-z A-Z]+$').hasMatch(value!)) {
@@ -197,8 +254,7 @@ class _HospitalistDetailsState extends State<HospitalistDetails> {
                   ),
                   TextFormField(
                     controller: sampledata8,
-                    decoration:
-                        InputDecoration(labelText: "Third Doctor Details"),
+                    decoration: InputDecoration(labelText: "Package2"),
                     validator: ((value) {
                       // if (value!.isEmpty) {
                       //   // !RegExp(r'^[a-z A-Z]+$').hasMatch(value!)) {
@@ -213,8 +269,7 @@ class _HospitalistDetailsState extends State<HospitalistDetails> {
                   ),
                   TextFormField(
                     controller: sampledata9,
-                    decoration:
-                        InputDecoration(labelText: "Fourth Doctor Details"),
+                    decoration: InputDecoration(labelText: "estimated cost2"),
                     validator: ((value) {
                       // if (value!.isEmpty) {
                       //   // !RegExp(r'^[a-z A-Z]+$').hasMatch(value!)) {
@@ -229,8 +284,7 @@ class _HospitalistDetailsState extends State<HospitalistDetails> {
                   ),
                   TextFormField(
                     controller: sampledata10,
-                    decoration:
-                        InputDecoration(labelText: "Fifth Doctor Details"),
+                    decoration: InputDecoration(labelText: "Package3"),
                     validator: ((value) {
                       // if (value!.isEmpty) {
                       //   // !RegExp(r'^[a-z A-Z]+$').hasMatch(value!)) {
@@ -239,14 +293,10 @@ class _HospitalistDetailsState extends State<HospitalistDetails> {
                       //   return null;
                       // }
                     }),
-                  ),
-                  SizedBox(
-                    height: height * 0.05,
                   ),
                   TextFormField(
                     controller: sampledata11,
-                    decoration:
-                        InputDecoration(labelText: "sixth Doctor Details"),
+                    decoration: InputDecoration(labelText: "estimated cost3"),
                     validator: ((value) {
                       // if (value!.isEmpty) {
                       //   // !RegExp(r'^[a-z A-Z]+$').hasMatch(value!)) {
@@ -259,38 +309,57 @@ class _HospitalistDetailsState extends State<HospitalistDetails> {
                   SizedBox(
                     height: height * 0.05,
                   ),
-                  TextFormField(
-                    controller: sampledata12,
-                    decoration:
-                        InputDecoration(labelText: "seventh Doctor Details"),
-                    validator: ((value) {
-                      // if (value!.isEmpty) {
-                      //   // !RegExp(r'^[a-z A-Z]+$').hasMatch(value!)) {
-                      //   return "Enter correct details please";
-                      // } else {
-                      //   return null;
-                      // }
-                    }),
-                  ),
-                  SizedBox(
-                    height: height * 0.05,
-                  ),
-                  TextFormField(
-                    controller: sampledata13,
-                    decoration:
-                        InputDecoration(labelText: "Eighth Doctor Details"),
-                    validator: ((value) {
-                      // if (value!.isEmpty) {
-                      //   // !RegExp(r'^[a-z A-Z]+$').hasMatch(value!)) {
-                      //   return "Enter correct details please";
-                      // } else {
-                      //   return null;
-                      // }
-                    }),
-                  ),
-                  SizedBox(
-                    height: height * 0.05,
-                  ),
+                  // SizedBox(
+                  //   height: height * 0.05,
+                  // ),
+                  // TextFormField(
+                  //   controller: sampledata11,
+                  //   decoration:
+                  //       InputDecoration(labelText: "sixth Doctor Details"),
+                  //   validator: ((value) {
+                  //     // if (value!.isEmpty) {
+                  //     //   // !RegExp(r'^[a-z A-Z]+$').hasMatch(value!)) {
+                  //     //   return "Enter correct details please";
+                  //     // } else {
+                  //     //   return null;
+                  //     // }
+                  //   }),
+                  // ),
+                  // SizedBox(
+                  //   height: height * 0.05,
+                  // ),
+                  // TextFormField(
+                  //   controller: sampledata12,
+                  //   decoration:
+                  //       InputDecoration(labelText: "seventh Doctor Details"),
+                  //   validator: ((value) {
+                  //     // if (value!.isEmpty) {
+                  //     //   // !RegExp(r'^[a-z A-Z]+$').hasMatch(value!)) {
+                  //     //   return "Enter correct details please";
+                  //     // } else {
+                  //     //   return null;
+                  //     // }
+                  //   }),
+                  // ),
+                  // SizedBox(
+                  //   height: height * 0.05,
+                  // ),
+                  // TextFormField(
+                  //   controller: sampledata13,
+                  //   decoration:
+                  //       InputDecoration(labelText: "Eighth Doctor Details"),
+                  //   validator: ((value) {
+                  //     // if (value!.isEmpty) {
+                  //     //   // !RegExp(r'^[a-z A-Z]+$').hasMatch(value!)) {
+                  //     //   return "Enter correct details please";
+                  //     // } else {
+                  //     //   return null;
+                  //     // }
+                  //   }),
+                  // ),
+                  // SizedBox(
+                  //   height: height * 0.05,
+                  // ),
                   Row(
                     children: [
                       SizedBox(
@@ -302,12 +371,20 @@ class _HospitalistDetailsState extends State<HospitalistDetails> {
                           if (formkey.currentState!.validate()) {
                             Map<String, dynamic> data = {
                               "Hospital name": sampledata1.text,
-                              "Phone no.": sampledata2.text,
+                              "Phone no": sampledata2.text,
                               "email": sampledata3.text,
                               "Location": sampledata4.text,
 
                               "Hospital Details": sampledata5.text,
-                              "First Dr Details": sampledata6.text,
+                              "Package1": sampledata6.text,
+                              "estimated cost1": sampledata7.text,
+                              "Package2": sampledata8.text,
+                              "estimated cost2": sampledata9.text,
+                              "Package3": sampledata10.text,
+                              "estimated cost3": sampledata11.text,
+
+                              // "Package5": sampledata10.text,
+
                               // "7. Second Doctor Details": sampledata7.text,
                               // "8. Third Doctor Details": sampledata8.text,
                               // "9. Fourth Doctor Details": sampledata9.text,
@@ -318,10 +395,10 @@ class _HospitalistDetailsState extends State<HospitalistDetails> {
 
                               // FirebaseFirestore.
                             };
-                            sampledata1.clear();
-                            sampledata2.clear();
-                            sampledata3.clear();
-                            sampledata4.clear();
+                            // sampledata1.clear();
+                            // sampledata2.clear();
+                            // sampledata3.clear();
+                            // sampledata4.clear();
 
                             FirebaseFirestore.instance
                                 .collection("test")
