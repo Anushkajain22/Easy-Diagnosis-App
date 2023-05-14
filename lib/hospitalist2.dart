@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:self_login/hospital_info.dart/review_system/packages.dart';
 
 class HospitalList extends StatefulWidget {
   const HospitalList({Key? key}) : super(key: key);
@@ -15,7 +16,9 @@ class _HospitalListState extends State<HospitalList> {
   List<QueryDocumentSnapshot>? tests;
   SortType currentSortType = SortType.Name;
   bool isAscending = true;
+  String selectedHospital = '';
   String searchQuery = '';
+  String hospitalName = '';
 
   @override
   Widget build(BuildContext context) {
@@ -201,79 +204,94 @@ class _HospitalListState extends State<HospitalList> {
                           overlayColor: MaterialStateColor.resolveWith(
                               (states) => Colors.transparent),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              test['Hospital name'],
-                              style: TextStyle(
-                                fontSize: 24,
-                                color: Color.fromARGB(255, 10, 10, 10),
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'ProfessionalFont',
-                              ),
-                            ),
-                            SizedBox(height: 16),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.location_city,
-                                  color: Colors.grey,
-                                  size: 40,
+                        child: TextButton(
+                          onPressed: (() {
+                            // print("n);
+                            fetchHospitalDetails(test['Hospital name']);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Packages(
+                                  hospital: selectedHospital,
                                 ),
-                                SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      // Text(
-                                      //   test['Hospital name'],
-                                      //   style: TextStyle(
-                                      //     fontSize: 20,
-                                      //     fontWeight: FontWeight.bold,
-                                      //     fontFamily: 'ProfessionalFont',
-                                      //   ),
-                                      // ),
-                                      SizedBox(height: 8),
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.location_on,
-                                            color: Colors.red,
-                                            size: 16,
-                                          ),
-                                          SizedBox(width: 4),
-                                          Expanded(
-                                            child: Text(
-                                              test['Location'],
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.black54,
-                                                fontFamily: 'ProfessionalFont',
-                                              ),
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 1,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
+                              ),
+                            );
+                          }),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                test['Hospital name'],
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  color: Color.fromARGB(255, 10, 10, 10),
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'ProfessionalFont',
+                                ),
+                              ),
+                              SizedBox(height: 16),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.location_city,
+                                    color: Colors.grey,
+                                    size: 40,
                                   ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 16),
-                            Text(
-                              test['Hospital Details'],
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.black87,
-                                fontWeight: FontWeight.normal,
-                                fontFamily: 'ProfessionalFont',
+                                  SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        // Text(
+                                        //   test['Hospital name'],
+                                        //   style: TextStyle(
+                                        //     fontSize: 20,
+                                        //     fontWeight: FontWeight.bold,
+                                        //     fontFamily: 'ProfessionalFont',
+                                        //   ),
+                                        // ),
+                                        SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.location_on,
+                                              color: Colors.red,
+                                              size: 16,
+                                            ),
+                                            SizedBox(width: 4),
+                                            Expanded(
+                                              child: Text(
+                                                test['Location'],
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: Colors.black54,
+                                                  fontFamily:
+                                                      'ProfessionalFont',
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 1,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
+                              SizedBox(height: 16),
+                              Text(
+                                test['Hospital Details'],
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.normal,
+                                  fontFamily: 'ProfessionalFont',
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     );
@@ -324,5 +342,30 @@ class _HospitalListState extends State<HospitalList> {
                 .toLowerCase()
                 .contains(searchQuery.toLowerCase()))
         .toList();
+  }
+
+  void fetchHospitalDetails(String hospitalName) {
+    final selectedHospital = tests?.firstWhere(
+      (doc) => doc['Hospital name'] == hospitalName,
+      // orElse: () => null,
+    );
+
+    if (selectedHospital != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) {
+            if (selectedHospital.exists) {
+              // Access the 'hospitalName' property if it exists
+              final hospitalName = selectedHospital!['Hospital name'];
+              return Packages(hospital: hospitalName);
+            } else {
+              // Handle the case when the document does not exist
+              return Container(); // Replace with your desired fallback widget
+            }
+          },
+        ),
+      );
+    }
   }
 }
