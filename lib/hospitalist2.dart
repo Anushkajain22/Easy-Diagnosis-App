@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 class HospitalList extends StatefulWidget {
@@ -19,81 +20,146 @@ class _HospitalListState extends State<HospitalList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: Text(
-          'Hospital List',
-          style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'ProfessionalFont',
-              color: Color(0xFF363f93)),
-        ),
-        elevation: 0,
-        actions: [
-          PopupMenuTheme(
-            data: PopupMenuThemeData(
-              elevation: 8,
-              textStyle: TextStyle(fontSize: 16, color: Colors.black),
-              color: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(200.0),
+        child: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 5,
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back,
+              size: 35,
+            ),
+            onPressed: () {
+              // handle on press event
+            },
+          ),
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xfff36d1dc), Color(0xFFF5B86E5)],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
               ),
             ),
-            child: PopupMenuButton<SortType>(
-              icon: Icon(
-                Icons.sort,
-                color: Colors.black,
+            child: FlexibleSpaceBar(
+              titlePadding: EdgeInsets.only(
+                left: 20.0,
+                bottom: 100,
               ),
-              onSelected: (SortType selectedSortType) {
-                setState(() {
-                  currentSortType = selectedSortType;
-                  isAscending = !isAscending;
-                  sortTests();
-                });
-              },
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<SortType>>[
-                PopupMenuItem<SortType>(
-                  value: SortType.Name,
-                  child: Text('Sort by Name'),
+              title: Text(
+                'Select a Hospital',
+                style: TextStyle(
+                  fontSize: 35,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'ProfessionalFont',
+                  color: Colors.white,
                 ),
-                PopupMenuItem<SortType>(
-                  value: SortType.Location,
-                  child: Text('Sort by Location'),
-                ),
-                PopupMenuItem<SortType>(
-                  value: SortType.Rating,
-                  child: Text('Sort by Rating'),
-                ),
-              ],
+              ),
             ),
           ),
-        ],
+          actions: [
+            PopupMenuTheme(
+              data: PopupMenuThemeData(
+                elevation: 8,
+                textStyle: TextStyle(fontSize: 16, color: Colors.black),
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
+              child: PopupMenuButton<SortType>(
+                icon: Icon(
+                  Icons.sort,
+                  color: Colors.white,
+                ),
+                onSelected: (SortType selectedSortType) {
+                  setState(() {
+                    currentSortType = selectedSortType;
+                    isAscending = !isAscending;
+                    sortTests();
+                  });
+                },
+                itemBuilder: (BuildContext context) =>
+                    <PopupMenuEntry<SortType>>[
+                  PopupMenuItem<SortType>(
+                    value: SortType.Name,
+                    child: Row(
+                      children: [
+                        Text(
+                          'Sort by Name',
+                        ),
+                        SizedBox(width: 17),
+                        Icon(
+                          Icons.person,
+                          color: Colors.blue,
+                        ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem<SortType>(
+                    value: SortType.Location,
+                    child: Row(
+                      children: [
+                        Text('Sort by Location'),
+                        Icon(
+                          Icons.location_on,
+                          color: Colors.red,
+                        ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem<SortType>(
+                    value: SortType.Rating,
+                    child: Row(
+                      children: [
+                        Text('Sort by Rating'),
+                        SizedBox(width: 16),
+                        Icon(
+                          Icons.star,
+                          color: Colors.yellow,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
       body: Column(
         children: [
-          Padding(
-            padding: EdgeInsets.all(16.0),
-            child: TextField(
-              onChanged: (value) {
-                setState(() {
-                  searchQuery = value;
-                  filterTests();
-                });
-              },
-              decoration: InputDecoration(
-                labelText: 'Search',
-                prefixIcon: Icon(Icons.search),
-                filled: true,
-                fillColor: Colors.grey[200],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                  borderSide: BorderSide.none,
+          ClipRRect(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(30),
+              topRight: Radius.circular(30),
+            ),
+            child: Container(
+              color: Colors.grey[200],
+              padding: EdgeInsets.all(5.0), // reduced padding
+              child: TextField(
+                onChanged: (value) {
+                  setState(() {
+                    searchQuery = value;
+                    filterTests();
+                  });
+                },
+                decoration: InputDecoration(
+                  labelText: 'Search',
+                  prefixIcon: Icon(Icons.search),
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: 10.0,
+                      vertical: 8.0), // reduced content padding
+                  hintText: 'Search hospitals',
+                  hintStyle: TextStyle(color: Colors.grey),
                 ),
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
-                hintText: 'Search hospitals',
-                hintStyle: TextStyle(color: Colors.grey),
               ),
             ),
           ),
@@ -174,7 +240,7 @@ class _HospitalListState extends State<HospitalList> {
                                         children: [
                                           Icon(
                                             Icons.location_on,
-                                            color: Colors.black54,
+                                            color: Colors.red,
                                             size: 16,
                                           ),
                                           SizedBox(width: 4),
